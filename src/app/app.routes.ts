@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { Register } from './features/auth/register/register';
 import { Login } from './features/auth/login/login';
-import { Feed } from './features/feed/feed';
 import { authGuard } from './core/guards/auth.guards';
-import { Profile } from './features/profile/profile';
+import { Feed } from './features/muro/feed/feed';
+import { Profile } from './features/perfil/profile/profile';
 
 export const routes: Routes = [
   { path: 'register', component: Register },
