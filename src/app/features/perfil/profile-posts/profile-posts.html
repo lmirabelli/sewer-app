@@ -1,0 +1,41 @@
+<div class="mt-10 border-t border-slate-700 pt-8">
+    <h3 class="text-xl font-bold text-white mb-6">Mis últimas publicaciones</h3>
+
+    @if (cargandoPosts()) {
+    <p class="text-center text-slate-400 text-sm py-4">Cargando tus publicaciones...</p>
+    } @else {
+    @if (misUltimosPosts().length === 0) {
+    <div class="text-center py-8 bg-slate-900/40 border border-slate-800 rounded-lg">
+        <p class="text-slate-400 text-sm">Todavía no hiciste ninguna publicación en la cloaca.</p>
+    </div>
+    } @else {
+    <div class="space-y-4">
+        @for (post of misUltimosPosts(); track post._id) {
+        <div class="bg-slate-900 border border-slate-700/80 rounded-lg p-4 space-y-3 shadow-inner">
+
+            <div class="flex justify-between items-center text-xs text-slate-400">
+                <span>{{ post.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
+                <span
+                    class="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 text-[10px]">Post
+                    propio</span>
+            </div>
+
+            <p class="text-slate-200 text-sm leading-relaxed">{{ post.contenido }}</p>
+
+            @if (post.imagen) {
+            <div class="rounded overflow-hidden max-h-48 border border-slate-800">
+                <img [src]="post.imagen" alt="Imagen del post" class="w-full object-cover">
+            </div>
+            }
+
+            <div class="flex items-center gap-4 pt-2 border-t border-slate-800 text-xs text-slate-400">
+                <span>❤️ {{ post.likes?.length || 0 }} Me gusta</span>
+                <span>💬 {{ post.comentarios?.length || 0 }} Comentarios</span>
+            </div>
+
+        </div>
+        }
+    </div>
+    }
+    }
+</div>

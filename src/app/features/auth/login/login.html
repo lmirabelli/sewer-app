@@ -1,0 +1,11 @@
+<div class="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+  <div class="max-w-md w-full bg-slate-800 rounded-xl shadow-2xl p-8 border border-slate-700">
+    <app-login-header></app-login-header>
+
+    <app-login-form 
+      [loginForm]="loginForm" 
+      (enviarLogin)="onLogin()">
+    </app-login-form>
+
+  </div>
+</div>

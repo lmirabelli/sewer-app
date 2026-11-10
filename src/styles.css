@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+@theme {
+  --color-sewer-dark: #0b0f19;
+  --color-sewer-card: #111827;
+}
+
+body {
+  font-family: "DM Sans", sans-serif;
+}
+
+h1, h2, h3, h4, button, label {
+  font-family: "Bungee", sans-serif;
+}

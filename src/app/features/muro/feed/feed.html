@@ -1,0 +1,41 @@
+<div class="min-h-screen bg-slate-900 text-white">
+  <main class="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    
+    <app-crear-post (postCreado)="agregarPostALista($event)"></app-crear-post>
+
+    <div class="flex items-center justify-between bg-slate-800 border border-slate-700 px-4 py-3 rounded-xl shadow-md">
+      <span class="text-sm font-medium text-slate-300">Ordenar publicaciones:</span>
+      <select 
+        [(ngModel)]="ordenSeleccionado" 
+        (change)="cambiarOrden()"
+        class="bg-slate-900 border border-slate-700 text-sm rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="fecha">Más recientes</option>
+        <option value="likes">Más populares (Me gusta)</option>
+      </select>
+    </div>
+
+    @if (cargando()) {
+      <div class="text-center py-10 text-slate-400">Cargando publicaciones...</div>
+    } @else {
+      @if (posts().length === 0) {
+        <div class="text-center py-12 bg-slate-800/50 border border-slate-800 rounded-xl">
+          <p class="text-slate-400 text-sm">No hay publicaciones todavía. ¡Sé el primero en compartir algo en la cloaca!</p>
+        </div>
+      } @else {
+        @for (post of posts(); track post._id) {
+          <app-post-card
+            [post]="post"
+            [usuarioLogueadoId]="usuarioLogueadoId"
+            [backendUrl]="backendUrl"
+            [comentariosAbiertos]="comentariosAbiertos[post._id!]"
+            (like)="darLike($event)"
+            (eliminar)="eliminarPost($event)"
+            (toggleComentarios)="abrirComentarios($event)"
+            (comentar)="enviarComentario($event)">
+          </app-post-card>
+        }
+      }
+    }
+
+  </main>
+</div>

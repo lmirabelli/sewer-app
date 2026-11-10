@@ -1,0 +1,14 @@
+<div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700/60">
+    <div
+        class="w-16 h-16 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold text-2xl border border-blue-500/30 overflow-hidden">
+        @if(usuarioData.avatar !== ""){
+        <img [src]="backendUrl + usuarioData.avatar" alt="img-profile" />
+        }@else{
+        <img src="/public/sewer-app.png" alt="img-profile" />
+        }
+    </div>
+    <div>
+        <h3 class="font-semibold text-white">{{ usuarioData.username }}</h3>
+        <span class="text-xs text-blue-400 uppercase tracking-wider font-medium">{{ usuarioData.perfil }}</span>
+    </div>
+</div>

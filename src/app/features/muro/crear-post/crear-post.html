@@ -1,0 +1,19 @@
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg space-y-4">
+      <div class="flex items-start gap-4">
+        <textarea 
+          [(ngModel)]="nuevoPostTexto"
+          rows="3"
+          placeholder="¿Qué estás pensando para Sewer-app?"
+          class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none text-sm">
+        </textarea>
+      </div>
+
+      <div class="flex justify-end items-center pt-2 border-t border-slate-700/60">
+        <button 
+          (click)="crearPost()"
+          [disabled]="!nuevoPostTexto.trim()"
+          class="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg shadow transition cursor-pointer">
+          Publicar
+        </button>
+      </div>
+    </div>

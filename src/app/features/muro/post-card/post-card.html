@@ -1,0 +1,88 @@
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg space-y-4 mt-4">
+
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold overflow-hidden">
+                <img [src]="backendUrl + post.autor?.avatar" alt="img-profile" />
+            </div>
+            <div>
+                <h4 class="font-semibold text-white text-sm">{{ post.autor?.username }}</h4>
+                <span class="text-xs text-slate-400">{{ post.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
+            </div>
+        </div>
+
+        @if (esMiPost()) {
+        <button (click)="eliminar.emit(post._id!)"
+            class="text-slate-400 hover:text-red-400 transition p-1 rounded-lg hover:bg-slate-700/50 cursor-pointer"
+            title="Eliminar publicación">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        </button>
+        }
+    </div>
+
+    <p class="text-slate-200 text-sm leading-relaxed">{{ post.contenido }}</p>
+
+    @if (post.imagen) {
+    <div class="rounded-lg overflow-hidden border border-slate-700 max-h-96">
+        <img [src]="post.imagen" alt="Imagen del post" class="w-full object-cover">
+    </div>
+    }
+
+    <div class="flex items-center gap-6 pt-2 border-t border-slate-700/60 text-sm text-slate-400">
+        <button (click)="like.emit(post)" class="flex items-center gap-2 hover:text-blue-400 transition cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+            </svg>
+            <span>{{ post.likes?.length || 0 }} Me gusta</span>
+        </button>
+
+        <button (click)="toggleComentarios.emit(post)"
+            class="flex items-center gap-2 hover:text-blue-400 transition cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span>{{ post.comentarios?.length || 0 }} Comentarios</span>
+        </button>
+    </div>
+
+    @if (comentariosAbiertos) {
+    <div class="mt-4 pt-4 border-t border-slate-700/60 space-y-4">
+        <div class="flex gap-2">
+            <input type="text" [(ngModel)]="textoComentario" placeholder="Escribí un comentario sin filtro..."
+                class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                (keyup.enter)="enviarComentario()" />
+            <button (click)="enviarComentario()"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition cursor-pointer">
+                Comentar
+            </button>
+        </div>
+
+        <div class="space-y-3 pt-2">
+            @if (!post.comentarios || post.comentarios.length === 0) {
+            <p class="text-xs text-slate-500 italic text-center py-2">No hay comentarios todavía.</p>
+            } @else {
+            @for (comentario of post.comentarios; track comentario) {
+            <div class="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 space-y-1 text-xs">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-blue-400">{{ comentario.usuario?.username }}</span>
+                    <span class="text-slate-500 text-[10px]">{{ comentario.createdAt | date:'dd/MM/yyyy, HH:mm'
+                        }}</span>
+                </div>
+                <p class="text-slate-300 leading-relaxed">{{ comentario?.texto }}</p>
+            </div>
+            }
+            }
+        </div>
+    </div>
+    }
+
+</div>
