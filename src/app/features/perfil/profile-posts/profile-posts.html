@@ -15,12 +15,9 @@
 
             <div class="flex justify-between items-center text-xs text-slate-400">
                 <span>{{ post.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
-                <span
-                    class="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 text-[10px]">Post
-                    propio</span>
             </div>
-
-            <p class="text-slate-200 text-sm leading-relaxed">{{ post.contenido }}</p>
+            <h4>{{ post.titulo }}</h4>
+            <p class="text-slate-200 text-sm leading-relaxed">{{ post.cuerpo }}</p>
 
             @if (post.imagen) {
             <div class="rounded overflow-hidden max-h-48 border border-slate-800">

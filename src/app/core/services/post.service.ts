@@ -22,8 +22,8 @@ export class PostService {
         return this.http.get<Post[]>(this.apiUrl, { params });
     }
 
-    createPost(contenido: string, imagen?: string): Observable<Post> {
-        return this.http.post<Post>(this.apiUrl, { contenido, imagen });
+    createPost(postData: { titulo: string; cuerpo: string }) {
+        return this.http.post<Post>(`${environment.backendUrl}/posts`, postData);
     }
 
     toggleLike(postId: string): Observable<Post> {

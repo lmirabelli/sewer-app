@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { UserRegisterDto } from '../../../core/models/user';
 import { RegisterHeader } from '../register-header/register-header';
 import { RegisterForm } from '../register-form/register-form';
+import { environment } from '../../../../enviroment/enviroment';
 
 @Component({
   selector: 'app-register',
@@ -73,6 +74,8 @@ export class Register {
     this.loading = true;
     const formData = new FormData();
     const formValues: UserRegisterDto = this.registerForm.value;
+    const email = formValues.email;
+    const password = formValues.password;
 
     Object.keys(this.registerForm.controls).forEach(key => {
       if (key !== 'confirmPassword') {
@@ -84,18 +87,35 @@ export class Register {
       formData.append('avatar', this.selectedFile);
     }
 
-    this.http.post('http://localhost:3000/auth/register', formData).subscribe({
+
+    this.http.post(`${environment.backendUrl}/auth/register`, formData).subscribe({
       next: () => {
-        this.loading = false;
-        Swal.fire({
-          icon: 'success',
-          title: '¡Bienvenido a la cloaca!',
-          text: 'Registro exitoso. Ya podés iniciar sesión.',
-          background: '#0f172a',
-          color: '#f8fafc',
-          confirmButtonColor: '#334155'
+        this.http.post<any>(`${environment.backendUrl}/auth/login`, { email, password }).subscribe({
+          next: (loginRes) => {
+            this.loading = false;
+            
+            localStorage.setItem('access_token', loginRes.access_token);
+            if (loginRes.usuario) {
+              localStorage.setItem('usuario', JSON.stringify(loginRes.usuario));
+            }
+
+            Swal.fire({
+              icon: 'success',
+              title: '¡Bienvenido!',
+              text: 'Registro exitoso.',
+              background: '#0f172a',
+              color: '#f8fafc',
+              timer: 1500,
+              showConfirmButton: false
+            });
+
+            this.router.navigate(['/feed']);
+          },
+          error: () => {
+            this.loading = false;
+            this.router.navigate(['/login']);
+          }
         });
-        this.router.navigate(['/login']);
       },
       error: (err) => {
         this.loading = false;

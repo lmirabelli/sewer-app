@@ -22,6 +22,10 @@ export class Feed implements OnInit {
   cargando = signal<boolean>(true);
   ordenSeleccionado: string = 'fecha';
   
+  paginaActual = signal<number>(1);
+  limite: number = 10;
+  hasMore = signal<boolean>(true);
+
   comentariosAbiertos: { [postId: string]: boolean } = {};
   backendUrl = environment.backendUrl;
   usuarioLogueadoId: string = '';
@@ -47,10 +51,17 @@ export class Feed implements OnInit {
 
   cargarPosts(): void {
     this.cargando.set(true);
-    this.postService.getPosts({ orden: this.ordenSeleccionado }).subscribe({
+    const offset = (this.paginaActual() - 1) * this.limite;
+
+    this.postService.getPosts({ 
+      orden: this.ordenSeleccionado, 
+      limit: this.limite, 
+      offset: offset
+    }).subscribe({
       next: (data) => {
         this.posts.set(data);
         this.cargando.set(false);
+        this.hasMore.set(data.length === this.limite);
       },
       error: () => {
         this.cargando.set(false);
@@ -59,7 +70,17 @@ export class Feed implements OnInit {
   }
 
   cambiarOrden(): void {
+    this.paginaActual.set(1);
     this.cargarPosts();
+  }
+
+  cambiarPagina(delta: number): void {
+    const nuevaPagina = this.paginaActual() + delta;
+    if (nuevaPagina >= 1) {
+      this.paginaActual.set(nuevaPagina);
+      this.cargarPosts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   eliminarPost(postId: string): void {
@@ -86,7 +107,9 @@ export class Feed implements OnInit {
   }
 
   agregarPostALista(nuevoPost: Post): void {
-    this.posts.update(postsActuales => [nuevoPost, ...postsActuales]);
+    if (this.paginaActual() === 1) {
+      this.posts.update(postsActuales => [nuevoPost, ...postsActuales]);
+    }
   }
 
   darLike(post: Post): void {

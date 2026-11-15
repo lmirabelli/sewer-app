@@ -8,6 +8,8 @@
 
 body {
   font-family: "DM Sans", sans-serif;
+  background-image: url('../public/background.png');
+  background-position: center;
 }
 
 h1, h2, h3, h4, button, label {

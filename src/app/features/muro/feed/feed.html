@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-slate-900 text-white">
+<div class="min-h-screen text-white">
   <main class="max-w-2xl mx-auto px-4 py-8 space-y-6">
     
     <app-crear-post (postCreado)="agregarPostALista($event)"></app-crear-post>
@@ -17,7 +17,7 @@
     @if (cargando()) {
       <div class="text-center py-10 text-slate-400">Cargando publicaciones...</div>
     } @else {
-      @if (posts().length === 0) {
+      @if (posts().length === 0 && paginaActual() === 1) {
         <div class="text-center py-12 bg-slate-800/50 border border-slate-800 rounded-xl">
           <p class="text-slate-400 text-sm">No hay publicaciones todavía. ¡Sé el primero en compartir algo en la cloaca!</p>
         </div>
@@ -34,6 +34,26 @@
             (comentar)="enviarComentario($event)">
           </app-post-card>
         }
+
+        <div class="flex items-center justify-between bg-slate-800 border border-slate-700 px-6 py-4 rounded-xl shadow-md mt-6">
+          <button 
+            (click)="cambiarPagina(-1)"
+            [disabled]="paginaActual() === 1"
+            class="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
+            ← Anterior
+          </button>
+
+          <span class="text-sm text-slate-300 font-medium">
+            Página <span class="text-blue-400 font-bold">{{ paginaActual() }}</span>
+          </span>
+
+          <button 
+            (click)="cambiarPagina(1)"
+            [disabled]="!hasMore()"
+            class="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
+            Siguiente →
+          </button>
+        </div>
       }
     }
 

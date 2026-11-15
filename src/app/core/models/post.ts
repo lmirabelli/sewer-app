@@ -16,7 +16,8 @@ export interface Post {
         username: string;
         avatar?: string;
     };
-    contenido: string;
+    titulo?: string;
+    cuerpo?: string;
     imagen?: string;
     likes: string[];
     comentariosCount: number;

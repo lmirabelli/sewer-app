@@ -7,14 +7,16 @@ import { Post } from '../../../core/models/post';
 import { environment } from '../../../../enviroment/enviroment';
 import { ProfilePosts } from '../profile-posts/profile-posts';
 import { ProfileHeader } from '../profile-header/profile-header';
+import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    ProfileHeader, 
+    CommonModule,
+    ReactiveFormsModule,
+    ProfileHeader,
     ProfilePosts
   ],
   templateUrl: './profile.html',
@@ -22,8 +24,9 @@ import { ProfileHeader } from '../profile-header/profile-header';
 })
 export class Profile implements OnInit {
   profileForm!: FormGroup;
-  cargando: boolean = true;
+  cargando = signal<boolean>(true);
   cargandoPosts = signal<boolean>(true);
+  editando = signal<boolean>(false);
   misUltimosPosts = signal<Post[]>([]);
   mensajeExito: string = '';
   errorMensaje: string = '';
@@ -33,8 +36,9 @@ export class Profile implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private postService: PostService
-  ) {}
+    private postService: PostService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -47,14 +51,15 @@ export class Profile implements OnInit {
       apellido: ['', [Validators.required]],
       username: [''],
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+      passwordActual: ['', [Validators.required]],
       passwordNueva: ['', [Validators.minLength(6)]]
     });
   }
 
   cargarDatosDesdeBD(): void {
-    this.cargando = true;
+    this.cargando.set(true);
     this.cargandoPosts.set(true);
-    
+
     this.userService.getProfile().subscribe({
       next: (user: any) => {
         this.usuarioData = user;
@@ -66,7 +71,7 @@ export class Profile implements OnInit {
           email: user.email || ''
         });
 
-        this.cargando = false;
+        this.cargando.set(false);
 
         const userId = user._id || user.id;
         if (userId) {
@@ -75,9 +80,10 @@ export class Profile implements OnInit {
           this.cargandoPosts.set(false);
         }
       },
-      error: () => {
-        this.errorMensaje = 'No se pudieron cargar los datos del usuario.';
-        this.cargando = false;
+      error: (err) => {
+        console.error('Error al cargar perfil:', err);
+        this.errorMensaje = 'No se pudieron cargar los datos del usuario (verificá tu sesión).';
+        this.cargando.set(false);
         this.cargandoPosts.set(false);
       }
     });
@@ -96,6 +102,27 @@ export class Profile implements OnInit {
     });
   }
 
+  formatearFecha(fecha: string | Date): string {
+    if (!fecha) return 'No especificada';
+    const d = new Date(fecha);
+    if (isNaN(d.getTime())) return String(fecha);
+
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const year = d.getUTCFullYear();
+
+    return `${day}.${month}.${year}`;
+  }
+
+  toggleEdicion(): void {
+    this.editando.update(val => !val);
+    this.mensajeExito = '';
+    this.errorMensaje = '';
+    if (!this.editando()) {
+      this.cargarDatosDesdeBD();
+    }
+  }
+
   actualizarPerfil(): void {
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
@@ -105,13 +132,49 @@ export class Profile implements OnInit {
     this.mensajeExito = '';
     this.errorMensaje = '';
 
-    this.userService.updateProfile(this.profileForm.value).subscribe({
+    const formValues = this.profileForm.getRawValue();
+
+    // Armamos el objeto base que se va a enviar siempre
+    const datosAEnviar: any = {
+      nombre: formValues.nombre,
+      apellido: formValues.apellido,
+      username: formValues.username,
+      passwordActual: formValues.passwordActual
+    };
+
+    // ¡La magia! Solo agregamos la contraseña nueva si el usuario escribió algo
+    if (formValues.passwordNueva && formValues.passwordNueva.trim() !== '') {
+      datosAEnviar.passwordNueva = formValues.passwordNueva;
+    }
+
+    this.userService.updateProfile(datosAEnviar).subscribe({
       next: () => {
-        this.mensajeExito = '¡Perfil actualizado correctamente!';
-        this.profileForm.patchValue({ passwordNueva: '' });
+        Swal.fire({
+          title: '¡Peefeto Cabashedo!',
+          text: 'Los cambios se guardaron correctamente.',
+          icon: 'success',
+          background: '#1e293b',
+          color: '#f8fafc',
+          confirmButtonColor: '#2563eb',
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        this.editando.set(false);
+        this.profileForm.patchValue({ passwordActual: '', passwordNueva: '' });
+        this.cargarDatosDesdeBD();
       },
       error: (err) => {
-        this.errorMensaje = err.error?.message || 'Hubo un error al actualizar el perfil.';
+        const mensajeError = 'No se actualizo tu perfil';
+        
+        Swal.fire({
+          title: "Anda pa'ya",
+          text: mensajeError,
+          icon: 'error',
+          background: '#1e293b',
+          color: '#f8fafc',
+          confirmButtonColor: '#2563eb'
+        });
       }
     });
   }
