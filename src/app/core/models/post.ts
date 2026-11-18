@@ -7,6 +7,7 @@ export interface Comentario {
     };
     texto: string;
     createdAt: string | Date;
+    editado?: boolean;
 }
 
 export interface Post {

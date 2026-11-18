@@ -94,7 +94,7 @@ export class Register {
           next: (loginRes) => {
             this.loading = false;
             
-            localStorage.setItem('access_token', loginRes.access_token);
+            localStorage.setItem('token', loginRes.access_token);
             if (loginRes.usuario) {
               localStorage.setItem('usuario', JSON.stringify(loginRes.usuario));
             }

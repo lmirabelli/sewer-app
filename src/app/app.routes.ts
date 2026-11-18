@@ -4,8 +4,10 @@ import { Login } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth.guards';
 import { Feed } from './features/muro/feed/feed';
 import { Profile } from './features/perfil/profile/profile';
+import { Loading } from './features/loading/loading';
 
 export const routes: Routes = [
+  { path: 'loading', component: Loading },
   { path: 'register', component: Register },
   { path: 'login', component: Login },
   { path: 'feed', component: Feed, canActivate: [authGuard]},

@@ -34,6 +34,10 @@ export class PostService {
         return this.http.post<Post>(`${this.apiUrl}/${postId}/comments`, { texto });
     }
 
+    editComment(postId: string, commentId: string, texto: string): Observable<Post> {
+        return this.http.patch<Post>(`${this.apiUrl}/${postId}/comments/${commentId}`, { texto });
+    }
+
     deletePost(postId: string): Observable<any> {
         return this.http.delete(`${this.apiUrl}/${postId}`);
     }

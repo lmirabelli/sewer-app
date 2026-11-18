@@ -1,13 +1,11 @@
 <div class="min-h-screen text-white">
   <main class="max-w-2xl mx-auto px-4 py-8 space-y-6">
-    
+
     <app-crear-post (postCreado)="agregarPostALista($event)"></app-crear-post>
 
     <div class="flex items-center justify-between bg-slate-800 border border-slate-700 px-4 py-3 rounded-xl shadow-md">
       <span class="text-sm font-medium text-slate-300">Ordenar publicaciones:</span>
-      <select 
-        [(ngModel)]="ordenSeleccionado" 
-        (change)="cambiarOrden()"
+      <select [(ngModel)]="ordenSeleccionado" (change)="cambiarOrden()"
         class="bg-slate-900 border border-slate-700 text-sm rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         <option value="fecha">Más recientes</option>
         <option value="likes">Más populares (Me gusta)</option>
@@ -15,47 +13,161 @@
     </div>
 
     @if (cargando()) {
-      <div class="text-center py-10 text-slate-400">Cargando publicaciones...</div>
+    <div class="text-center py-10 text-slate-400">Cargando publicaciones...</div>
     } @else {
-      @if (posts().length === 0 && paginaActual() === 1) {
-        <div class="text-center py-12 bg-slate-800/50 border border-slate-800 rounded-xl">
-          <p class="text-slate-400 text-sm">No hay publicaciones todavía. ¡Sé el primero en compartir algo en la cloaca!</p>
-        </div>
-      } @else {
-        @for (post of posts(); track post._id) {
-          <app-post-card
-            [post]="post"
-            [usuarioLogueadoId]="usuarioLogueadoId"
-            [backendUrl]="backendUrl"
-            [comentariosAbiertos]="comentariosAbiertos[post._id!]"
-            (like)="darLike($event)"
-            (eliminar)="eliminarPost($event)"
-            (toggleComentarios)="abrirComentarios($event)"
-            (comentar)="enviarComentario($event)">
-          </app-post-card>
-        }
+    @if (posts().length === 0 && paginaActual() === 1) {
+    <div class="text-center py-12 bg-slate-800/50 border border-slate-800 rounded-xl">
+      <p class="text-slate-400 text-sm">No hay publicaciones todavía. ¡Sé el primero en compartir algo en la cloaca!</p>
+    </div>
+    } @else {
+    @for (post of posts(); track post._id) {
+    <div (click)="abrirDetallePost(post)" class="cursor-pointer transition hover:scale-[1.01]">
+      <app-post-card [post]="post" [usuarioLogueadoId]="usuarioLogueadoId" [backendUrl]="backendUrl"
+        [comentariosAbiertos]="comentariosAbiertos()[post._id!]" (like)="darLike($event)"
+        (eliminar)="eliminarPost($event)" (toggleComentarios)="abrirComentarios($event)"
+        (comentar)="enviarComentario($event)" (editarComentario)="editarComentario($event)">
+      </app-post-card>
+    </div>
+    }
 
-        <div class="flex items-center justify-between bg-slate-800 border border-slate-700 px-6 py-4 rounded-xl shadow-md mt-6">
-          <button 
-            (click)="cambiarPagina(-1)"
-            [disabled]="paginaActual() === 1"
-            class="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
-            ← Anterior
-          </button>
+    <div
+      class="flex items-center justify-between bg-slate-800 border border-slate-700 px-6 py-4 rounded-xl shadow-md mt-6">
+      <button (click)="cambiarPagina(-1)" [disabled]="paginaActual() === 1"
+        class="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
+        ← Anterior
+      </button>
 
-          <span class="text-sm text-slate-300 font-medium">
-            Página <span class="text-blue-400 font-bold">{{ paginaActual() }}</span>
-          </span>
+      <span class="text-sm text-slate-300 font-medium">
+        Página <span class="text-blue-400 font-bold">{{ paginaActual() }}</span>
+      </span>
 
-          <button 
-            (click)="cambiarPagina(1)"
-            [disabled]="!hasMore()"
-            class="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
-            Siguiente →
-          </button>
-        </div>
-      }
+      <button (click)="cambiarPagina(1)" [disabled]="!hasMore()"
+        class="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
+        Siguiente →
+      </button>
+    </div>
+    }
     }
 
   </main>
+  @if (postSeleccionado(); as post) {
+  <div (click)="cerrarDetallePost()"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+
+    <div (click)="$event.stopPropagation()"
+      class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col md:flex-row overflow-hidden shadow-2xl">
+
+      <div
+        class="md:w-3/5 p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between bg-slate-950/50">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <img [src]="post.autor?.avatar || 'assets/default-avatar.png'"
+              class="w-11 h-11 rounded-full object-cover border border-slate-700" alt="Avatar" />
+            <div>
+              <h4 class="font-bold text-white text-base">{{ post.autor?.username }}</h4>
+              <span class="text-xs text-slate-400">{{ post.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
+            </div>
+          </div>
+
+          @if (post.titulo) {
+          <h3 class="text-xl font-bold text-white mb-2">{{ post.titulo }}</h3>
+          }
+          <p class="text-slate-200 text-base leading-relaxed whitespace-pre-line mb-4">
+            {{ post.cuerpo }}
+          </p>
+
+          @if (post.imagen) {
+          <div class="rounded-xl overflow-hidden border border-slate-800 bg-black flex justify-center">
+            <img [src]="post.imagen.startsWith('http') ? post.imagen : backendUrl + post.imagen"
+              class="max-h-[55vh] w-auto object-contain" alt="Imagen de la publicación" />
+          </div>
+          }
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-sm text-slate-400">
+          <button (click)="$event.stopPropagation(); darLike(post)"
+            class="flex items-center gap-2 hover:text-blue-400 transition font-semibold cursor-pointer">
+            <span>👍 {{ post.likes?.length || 0 }} Me gusta</span>
+          </button>
+          <span>💬 {{ post.comentarios?.length || 0 }} Comentarios</span>
+        </div>
+      </div>
+
+      <div class="md:w-2/5 flex flex-col h-[50vh] md:h-auto bg-slate-900">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+          <h4 class="font-bold text-slate-200 text-sm uppercase tracking-wider">Comentarios</h4>
+          <button (click)="cerrarDetallePost()"
+            class="text-slate-400 hover:text-white text-xl font-bold px-2 cursor-pointer">
+            ✕
+          </button>
+        </div>
+
+        <div class="flex-1 p-4 overflow-y-auto space-y-3">
+          @if (!post.comentarios || post.comentarios.length === 0) {
+          <p class="text-slate-500 text-sm text-center py-8">Todavía no hay comentarios. Bardea sin limites</p>
+          } @else {
+          @for (com of post.comentarios | slice:0:getLimiteComentarios(post._id!); track $index) {
+          <div class="bg-slate-800/70 border border-slate-700/50 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-blue-400 text-xs">{{ com.usuario?.username || 'Usuario' }}</span>
+                @if (com.editado) {
+                <span class="text-[10px] text-amber-400/80 italic">muy tibio (comentario editado)</span>
+                }
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] text-slate-500">{{ com.createdAt | date:'dd/MM HH:mm' }}</span>
+                @if (esMiComentario(com)) {
+                <button (click)="$event.stopPropagation(); iniciarEdicionModal(com)"
+                  class="text-slate-400 hover:text-blue-400 transition cursor-pointer text-[11px]"
+                  title="Editar comentario">
+                  ✏️
+                </button>
+                }
+              </div>
+            </div>
+
+            @if (comentarioEnEdicionId === com._id) {
+            <div class="flex gap-2 mt-1">
+              <input type="text" [(ngModel)]="textoEdicionModal"
+                class="flex-1 px-2 py-1 bg-slate-900 border border-slate-600 rounded text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                (keyup.enter)="guardarEdicionModal(com)" (keyup.escape)="cancelarEdicionModal()" />
+              <button (click)="$event.stopPropagation(); guardarEdicionModal(com)"
+                class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded cursor-pointer">
+                Guardar
+              </button>
+              <button (click)="$event.stopPropagation(); cancelarEdicionModal()"
+                class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-semibold rounded cursor-pointer">
+                Cancelar
+              </button>
+            </div>
+            } @else {
+            <p class="text-slate-200 text-sm">{{ com.texto }}</p>
+            }
+          </div>
+          }
+
+          @if (post.comentarios.length > getLimiteComentarios(post._id!)) {
+          <button type="button" (click)="cargarMasComentarios(post._id!, post.comentarios.length)"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 text-xs font-semibold rounded-lg transition border border-slate-700/50 cursor-pointer mt-2">
+            Ver más comentarios ({{ post.comentarios.length - getLimiteComentarios(post._id!) }} más)
+          </button>
+          }
+          }
+        </div>
+
+        <form (ngSubmit)="comentarDesdeModal()" class="p-3 border-t border-slate-800 flex gap-2 bg-slate-950">
+          <input type="text" [(ngModel)]="nuevoComentarioModal" name="nuevoComentarioModal"
+            placeholder="Escribí un comentario..."
+            class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <button type="submit" [disabled]="!nuevoComentarioModal.trim()"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-600 text-white text-sm font-semibold rounded-lg transition cursor-pointer">
+            Enviar
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+  }
 </div>

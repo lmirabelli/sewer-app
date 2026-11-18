@@ -31,14 +31,12 @@
       </div>
     }
 
-    <!-- SPINNER / MENSAJE DE CARGA AL HACER F5 -->
     @if (cargando()) {
       <div class="text-center py-16 text-slate-400 space-y-3">
         <p class="text-lg font-medium">Cargando perfil...</p>
       </div>
     } @else {
 
-      <!-- MODO VISTA (Sólo lectura) -->
       @if (!editando()) {
         <div class="space-y-6">
           <app-profile-header [usuarioData]="usuarioData" [backendUrl]="backendUrl"></app-profile-header>
@@ -68,7 +66,6 @@
         </div>
       }
 
-      <!-- MODO EDICIÓN (Formulario interactivo) -->
       @if (editando()) {
         <form [formGroup]="profileForm" (ngSubmit)="actualizarPerfil()" class="space-y-6">
           

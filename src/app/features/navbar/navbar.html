@@ -8,10 +8,19 @@
     <a routerLink="/feed" class="text-sm text-slate-300 hover:text-white transition">Muro</a>
     <a routerLink="/profile" class="text-sm text-slate-300 hover:text-white transition">Perfil</a>
     
+    @if (authService.tiempoRestante() > 0) {
+      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+        <span class="text-amber-400 text-sm animate-pulse">⏱️</span>
+        <span class="text-amber-400 font-mono text-sm font-semibold">
+          {{ formatearTiempo(authService.tiempoRestante()) }}
+        </span>
+      </div>
+    }
+
     <button 
-  (click)="onLogout()" 
-  class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium rounded-lg transition cursor-pointer">
-  Cerrar Sesión
-</button>
+      (click)="onLogout()" 
+      class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium rounded-lg transition cursor-pointer">
+      Cerrar Sesión
+    </button>
   </div>
 </header>

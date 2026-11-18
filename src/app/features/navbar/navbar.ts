@@ -12,12 +12,17 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class Navbar {
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router
   ) {}
 
   onLogout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+  }
+
+  formatearTiempo(segundos: number): string {
+    const min = Math.floor(segundos / 60);
+    const seg = segundos % 60;
+    return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
   }
 }

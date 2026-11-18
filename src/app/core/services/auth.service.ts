@@ -1,16 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, of } from 'rxjs';
 import { AuthResponse, User } from '../models/user';
 import { environment } from '../../../enviroment/enviroment';
+import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
     private apiUrl = `${environment.backendUrl}/auth`;
+    private contadorSesion: any;
+    private intervalReloj: any;
+    public tiempoRestante = signal<number>(0);
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private http: HttpClient,
+        private router: Router
+    ) { }
 
     register(userData: any): Observable<any> {
         return this.http.post(`${this.apiUrl}/register`, userData);
@@ -21,8 +29,76 @@ export class AuthService {
             tap(response => {
                 localStorage.setItem('token', response.access_token);
                 localStorage.setItem('usuario', JSON.stringify(response.usuario));
+                this.iniciarContadorSesion();
             })
         );
+    }
+
+    validarToken(): Observable<any> {
+        return this.http.get(`${this.apiUrl}/validate`).pipe(
+            catchError(() => of(null))
+        );
+    }
+
+    iniciarContadorSesion(): void {
+        this.limpiarContador(); 
+        
+        this.tiempoRestante.set(10 * 60); 
+
+        this.intervalReloj = setInterval(() => {
+            this.tiempoRestante.update(t => t > 0 ? t - 1 : 0);
+        }, 1000);
+
+        this.contadorSesion = setTimeout(() => {
+            Swal.fire({
+                title: '¿Seguimos?',
+                text: 'Tu sesión está por expirar. Te quedan 5 minutos.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Extender sesión',
+                cancelButtonText: 'Salir',
+                background: '#1e293b',
+                color: '#f8fafc',
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#475569',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.refrescarToken();
+                } else {
+                    this.logout();
+                }
+            });
+        }, 10 * 60 * 1000); 
+    }
+
+    refrescarToken(): void {
+        this.http.post<{ access_token: string }>(`${this.apiUrl}/refresh`, {}).subscribe({
+            next: (res) => {
+                localStorage.setItem('token', res.access_token);
+                this.iniciarContadorSesion(); 
+                
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Sesión extendida',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    background: '#1e293b',
+                    color: '#f8fafc'
+                });
+            },
+            error: () => {
+                this.logout();
+            }
+        });
+    }
+
+    limpiarContador(): void {
+        if (this.contadorSesion) {
+            clearTimeout(this.contadorSesion);
+        }
     }
 
     getToken(): string | null {
@@ -44,7 +120,9 @@ export class AuthService {
     }
 
     logout(): void {
+        this.limpiarContador();
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
+        this.router.navigate(['/login']);
     }
 }
