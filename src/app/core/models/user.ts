@@ -6,7 +6,7 @@ export interface UserRegisterDto {
     password?: string;
     fechaNacimiento: string;
     descripcionBreve?: string;
-    perfil: 'usuario' | 'administrador';
+    perfil: 'usuario' | 'admin';
     avatar?: string;
 }
 
@@ -14,7 +14,7 @@ export interface User {
     id: string;
     nombre: string;
     email: string;
-    perfil: 'usuario' | 'administrador';
+    perfil: 'usuario' | 'admin';
 }
 
 export interface AuthResponse {
@@ -27,6 +27,6 @@ export interface UserProfile {
     id?: string;
     nombre: string;
     email: string;
-    perfil: 'usuario' | 'administrador';
+    perfil: 'usuario' | 'admin';
     avatar?: string;
 }

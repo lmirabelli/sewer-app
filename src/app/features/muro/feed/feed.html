@@ -21,7 +21,7 @@
     </div>
     } @else {
     @for (post of posts(); track post._id) {
-    <div (click)="abrirDetallePost(post)" class="cursor-pointer transition hover:scale-[1.01]">
+    <div (click)="abrirDetallePost(post)" class="cursor-pointer">
       <app-post-card [post]="post" [usuarioLogueadoId]="usuarioLogueadoId" [backendUrl]="backendUrl"
         [comentariosAbiertos]="comentariosAbiertos()[post._id!]" (like)="darLike($event)"
         (eliminar)="eliminarPost($event)" (toggleComentarios)="abrirComentarios($event)"
@@ -60,15 +60,25 @@
       <div
         class="md:w-3/5 p-6 overflow-y-auto border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between bg-slate-950/50">
         <div>
-          <div class="flex items-center gap-3 mb-4">
+          <div class="flex items-center justify-center mb-4">
             <img [src]="post.autor?.avatar || 'assets/default-avatar.png'"
-              class="w-11 h-11 rounded-full object-cover border border-slate-700" alt="Avatar" />
+              class="w-11 h-11 rounded-full object-cover border border-slate-700 ml-4 mr-4" alt="Avatar" />
             <div>
               <h4 class="font-bold text-white text-base">{{ post.autor?.username }}</h4>
               <span class="text-xs text-slate-400">{{ post.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
             </div>
+            @if (puedeEliminarModal(post)) {
+            <button (click)="$event.stopPropagation(); eliminarPost(post._id!)"
+              class="text-slate-400 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              title="Eliminar publicación">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+            }
           </div>
-
           @if (post.titulo) {
           <h3 class="text-xl font-bold text-white mb-2">{{ post.titulo }}</h3>
           }
@@ -157,7 +167,7 @@
         </div>
 
         <form (ngSubmit)="comentarDesdeModal()" class="p-3 border-t border-slate-800 flex gap-2 bg-slate-950">
-          <input type="text" [(ngModel)]="nuevoComentarioModal" name="nuevoComentarioModal"
+          <input type="text" [(ngModel)]="nuevoComentarioModal" appAutofocus name="nuevoComentarioModal"
             placeholder="Escribí un comentario..."
             class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           <button type="submit" [disabled]="!nuevoComentarioModal.trim()"

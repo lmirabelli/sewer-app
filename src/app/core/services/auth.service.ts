@@ -14,6 +14,8 @@ export class AuthService {
     private contadorSesion: any;
     private intervalReloj: any;
     public tiempoRestante = signal<number>(0);
+    private readonly DURACION_SESION_SEG = 3 * 60; 
+    private readonly TIEMPO_AVISO_SEG = 60;
 
     constructor(
         private http: HttpClient,
@@ -41,36 +43,51 @@ export class AuthService {
     }
 
     iniciarContadorSesion(): void {
-        this.limpiarContador(); 
-        
-        this.tiempoRestante.set(10 * 60); 
+    this.limpiarContador();
 
-        this.intervalReloj = setInterval(() => {
-            this.tiempoRestante.update(t => t > 0 ? t - 1 : 0);
-        }, 1000);
+    this.tiempoRestante.set(this.DURACION_SESION_SEG);
 
-        this.contadorSesion = setTimeout(() => {
-            Swal.fire({
-                title: '¿Seguimos?',
-                text: 'Tu sesión está por expirar. Te quedan 5 minutos.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Extender sesión',
-                cancelButtonText: 'Salir',
-                background: '#1e293b',
-                color: '#f8fafc',
-                confirmButtonColor: '#2563eb',
-                cancelButtonColor: '#475569',
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    this.refrescarToken();
-                } else {
-                    this.logout();
-                }
-            });
-        }, 10 * 60 * 1000); 
+    this.intervalReloj = setInterval(() => {
+        this.tiempoRestante.update(t => (t > 0 ? t - 1 : 0));
+    }, 1000);
+
+    const tiempoHastaAvisoMs = (this.DURACION_SESION_SEG - this.TIEMPO_AVISO_SEG) * 1000;
+
+    this.contadorSesion = setTimeout(() => {
+        Swal.fire({
+            title: '¿Seguimos?',
+            text: 'Tu sesión está por expirar. Te queda 1 minuto.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Extender sesión',
+            cancelButtonText: 'Salir',
+            background: '#1e293b',
+            color: '#f8fafc',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#475569',
+            allowOutsideClick: false,
+            timer: (this.TIEMPO_AVISO_SEG - 2) * 1000,
+            timerProgressBar: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.refrescarToken();
+            } else {
+                this.logout();
+            }
+        });
+    }, tiempoHastaAvisoMs);
+}
+
+limpiarContador(): void {
+    if (this.contadorSesion) {
+        clearTimeout(this.contadorSesion);
+        this.contadorSesion = null;
     }
+    if (this.intervalReloj) {
+        clearInterval(this.intervalReloj);
+        this.intervalReloj = null;
+    }
+}
 
     refrescarToken(): void {
         this.http.post<{ access_token: string }>(`${this.apiUrl}/refresh`, {}).subscribe({
@@ -95,11 +112,6 @@ export class AuthService {
         });
     }
 
-    limpiarContador(): void {
-        if (this.contadorSesion) {
-            clearTimeout(this.contadorSesion);
-        }
-    }
 
     getToken(): string | null {
         return localStorage.getItem('token');
@@ -116,7 +128,7 @@ export class AuthService {
 
     isAdmin(): boolean {
         const usuario = this.getUsuarioActual();
-        return usuario?.perfil === 'administrador';
+        return usuario?.perfil === 'admin';
     }
 
     logout(): void {

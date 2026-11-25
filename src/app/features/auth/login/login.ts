@@ -28,7 +28,7 @@ export class Login {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      identifier: ['', [Validators.required]], 
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -38,8 +38,6 @@ export class Login {
       this.loginForm.markAllAsTouched();
       return;
     }
-
-
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
         this.router.navigate(['/feed']);
@@ -47,7 +45,7 @@ export class Login {
       error: (err) => {
         console.error('Error en el login', err);
         
-        const mensajeError = err.error?.message || 'Verificá tu correo y contraseña.';
+        const mensajeError = err.error?.message || 'Verificá tus datos e intentá de nuevo.';
 
         Swal.fire({
           icon: 'error',

@@ -1,0 +1,89 @@
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-xl">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold text-white">Gestión de Usuarios</h2>
+    <button (click)="mostrarFormulario.set(!mostrarFormulario())" 
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
+      {{ mostrarFormulario() ? 'Cancelar' : '+ Nuevo Usuario' }}
+    </button>
+  </div>
+
+  @if (mostrarFormulario()) {
+    <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 mb-6">
+      <h3 class="text-lg font-semibold text-blue-400 mb-4">Crear Nuevo Usuario</h3>
+      <form (ngSubmit)="crearUsuario()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" [(ngModel)]="nuevoUsuario.nombre" name="nombre" placeholder="Nombre" required class="bg-slate-800 border border-slate-600 rounded p-2 text-white">
+        <input type="text" [(ngModel)]="nuevoUsuario.apellido" name="apellido" placeholder="Apellido" required class="bg-slate-800 border border-slate-600 rounded p-2 text-white">
+        <input type="text" [(ngModel)]="nuevoUsuario.username" name="username" placeholder="Nombre de usuario" required class="bg-slate-800 border border-slate-600 rounded p-2 text-white">
+        <input type="email" [(ngModel)]="nuevoUsuario.email" name="email" placeholder="Correo electrónico" required class="bg-slate-800 border border-slate-600 rounded p-2 text-white">
+        <input type="password" [(ngModel)]="nuevoUsuario.password" name="password" placeholder="Contraseña" required class="bg-slate-800 border border-slate-600 rounded p-2 text-white">
+        <input type="date" [(ngModel)]="nuevoUsuario.fechaNacimiento" name="fechaNacimiento" required class="bg-slate-800 border border-slate-600 rounded p-2 text-white">
+        
+        <div class="col-span-1 md:col-span-2 flex gap-6 items-center py-2">
+          <span class="text-sm text-slate-300 font-medium">Rol del usuario:</span>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" [(ngModel)]="nuevoUsuario.perfil" name="perfil" value="usuario" class="w-4 h-4 text-blue-600">
+            <span class="text-slate-200">Usuario</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" [(ngModel)]="nuevoUsuario.perfil" name="perfil" value="admin" class="w-4 h-4 text-blue-600">
+            <span class="text-slate-200">Administrador</span>
+          </label>
+        </div>
+
+        <div class="col-span-1 md:col-span-2 mt-2">
+          <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition">Guardar Usuario</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="text-center py-8 text-slate-400">
+      Cargando usuarios...
+    </div>
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="text-xs uppercase bg-slate-900/80 text-slate-400">
+          <tr>
+            <th class="px-4 py-3">Usuario</th>
+            <th class="px-4 py-3">Email</th>
+            <th class="px-4 py-3">Rol</th>
+            <th class="px-4 py-3">Estado</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of usuarios(); track user._id) {
+            <tr class="border-b border-slate-700/50 hover:bg-slate-800/50">
+              <td class="px-4 py-3 flex items-center gap-3">
+                <img [src]="user.avatar" class="w-8 h-8 rounded-full">
+                <div>
+                  <div class="font-medium text-white">{{ user.username }}</div>
+                  <div class="text-xs text-slate-500">{{ user.nombre }} {{ user.apellido }}</div>
+                </div>
+              </td>
+              <td class="px-4 py-3">{{ user.email }}</td>
+              <td class="px-4 py-3">
+<span [ngClass]="user.perfil | roleColor">{{ user.perfil }}</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded text-xs font-semibold" 
+                      [ngClass]="user.habilitado ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'">
+                  {{ user.habilitado ? 'Habilitado' : 'Deshabilitado' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button (click)="cambiarEstado(user._id)" 
+                        class="text-xs font-medium px-3 py-1 rounded border transition"
+                        [ngClass]="user.habilitado ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-green-500/50 text-green-400 hover:bg-green-500/10'">
+                  {{ user.habilitado ? 'Deshabilitar' : 'Habilitar' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

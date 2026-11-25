@@ -14,15 +14,25 @@ export class Navbar {
   constructor(
     public authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
+
+  ngOnInit(): void {
+    if (this.authService.getToken() && this.authService.tiempoRestante() === 0) {
+      this.authService.iniciarContadorSesion();
+    }
+  }
 
   onLogout(): void {
     this.authService.logout();
   }
 
+
   formatearTiempo(segundos: number): string {
+
     const min = Math.floor(segundos / 60);
     const seg = segundos % 60;
-    return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+    const tiempoFormateado = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+
+    return tiempoFormateado;
   }
 }

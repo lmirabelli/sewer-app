@@ -1,4 +1,4 @@
-<div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg space-y-4 mt-4">
+<div appHover class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg space-y-4 mt-4">
 
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -11,12 +11,12 @@
                 <h4 class="font-semibold text-white text-sm">
                     {{ typeof post.autor === 'object' && post.autor !== null ? post.autor.username : 'Usuario' }}
                 </h4>
-                <span class="text-xs text-slate-400">{{ post.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
+                <span class="text-xs text-slate-400">{{ post.createdAt | timeAgo }}</span>
             </div>
         </div>
 
-        @if (esMiPost()) {
-        <button (click)="eliminar.emit(post._id!)"
+        @if (true) {
+        <button (click)="$event.stopPropagation(); eliminar.emit(post._id!)"
             class="text-slate-400 hover:text-red-400 transition p-1 rounded-lg hover:bg-slate-700/50 cursor-pointer"
             title="Eliminar publicación">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -28,9 +28,9 @@
     </div>
 
 
-    <div class="space-y-1">
+    <div class="space-y-1 overflow-hidden">
         <h3 class="text-white font-bold text-base tracking-tight">{{ post.titulo }}</h3>
-        <p class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">{{ post.cuerpo }}</p>
+        <p class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">{{ post.cuerpo | truncate: 150 }}</p>
     </div>
 
 
@@ -41,7 +41,8 @@
     }
 
     <div class="flex items-center gap-6 pt-2 border-t border-slate-700/60 text-sm text-slate-400">
-        <button (click)="like.emit(post)" class="flex items-center gap-2 hover:text-blue-400 transition cursor-pointer">
+        <button (click)="$event.stopPropagation(); like.emit(post)"
+            class="flex items-center gap-2 hover:text-blue-400 transition cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
@@ -49,7 +50,7 @@
             <span>{{ post.likes?.length || 0 }} Me gusta</span>
         </button>
 
-        <button (click)="toggleComentarios.emit(post)"
+        <button (click)="$event.stopPropagation(); toggleComentarios.emit(post)"
             class="flex items-center gap-2 hover:text-blue-400 transition cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -64,8 +65,8 @@
         <div class="flex gap-2">
             <input type="text" [(ngModel)]="textoComentario" placeholder="Escribí un comentario sin filtro..."
                 class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                (keyup.enter)="enviarComentario()" />
-            <button (click)="enviarComentario()"
+                (keyup.enter)="enviarComentario()" (click)="$event.stopPropagation()" />
+            <button (click)="$event.stopPropagation(); enviarComentario()"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition cursor-pointer">
                 Comentar
             </button>
@@ -76,16 +77,28 @@
             <p class="text-xs text-slate-500 italic text-center py-2">No hay comentarios todavía.</p>
             } @else {
             @for (comentario of post.comentarios; track comentario) {
-            <div class="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 space-y-1 text-xs">
+            <div [appHighlight]="comentario.usuario?.perfil === 'admin'">
+
                 <div class="flex justify-between items-center">
-                    <span class="font-semibold text-blue-400">{{ comentario.usuario?.username }}</span>
+                    <div class="flex items-center">
+                        <span
+                            [ngClass]="comentario.usuario?.perfil === 'admin' ? 'comment-username comment-username-admin' : 'comment-username comment-username-normal'">
+                            {{ comentario.usuario?.username }}
+                        </span>
+
+                        @if (comentario.usuario?.perfil === 'admin') {
+                        <span class="admin-badge">👑 Admin</span>
+                        }
+                    </div>
+
                     <div class="flex items-center gap-2">
-                        <span class="text-slate-500 text-[10px]">{{ comentario.createdAt | date:'dd/MM/yyyy, HH:mm' }}</span>
+                        <span class="text-slate-500 text-[10px]">{{ comentario.createdAt | date:'dd/MM/yyyy, HH:mm'
+                            }}</span>
                         @if (comentario.editado) {
                         <span class="text-[10px] text-amber-400/80 italic">(editado)</span>
                         }
                         @if (esMiComentario(comentario)) {
-                        <button (click)="iniciarEdicion(comentario)"
+                        <button (click)="$event.stopPropagation(); iniciarEdicion(comentario)"
                             class="text-slate-400 hover:text-blue-400 transition cursor-pointer"
                             title="Editar comentario">
                             ✏️
@@ -95,21 +108,22 @@
                 </div>
 
                 @if (comentarioEnEdicionId === comentario._id) {
-                <div class="flex gap-2 pt-1">
+                <div class="flex gap-2 pt-1 mt-2">
                     <input type="text" [(ngModel)]="textoEdicion"
                         class="flex-1 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        (keyup.enter)="guardarEdicion(comentario)" (keyup.escape)="cancelarEdicion()" />
-                    <button (click)="guardarEdicion(comentario)"
+                        (keyup.enter)="guardarEdicion(comentario)" (keyup.escape)="cancelarEdicion()"
+                        (click)="$event.stopPropagation()" />
+                    <button (click)="$event.stopPropagation(); guardarEdicion(comentario)"
                         class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded cursor-pointer">
                         Guardar
                     </button>
-                    <button (click)="cancelarEdicion()"
+                    <button (click)="$event.stopPropagation(); cancelarEdicion()"
                         class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-semibold rounded cursor-pointer">
                         Cancelar
                     </button>
                 </div>
                 } @else {
-                <p class="text-slate-300 leading-relaxed">{{ comentario?.texto }}</p>
+                <p class="text-slate-300 leading-relaxed mt-1">{{ comentario?.texto }}</p>
                 }
             </div>
             }

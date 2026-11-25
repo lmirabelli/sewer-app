@@ -1,0 +1,61 @@
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-xl">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <h2 class="text-xl font-bold text-white">Estadísticas de la Cloaca</h2>
+    
+    <div class="flex items-end gap-3">
+      <div class="flex flex-col">
+        <label class="text-xs text-slate-400 mb-1">Desde</label>
+        <input type="date" [(ngModel)]="fechaDesde" class="bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm focus:outline-none focus:border-blue-500">
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs text-slate-400 mb-1">Hasta</label>
+        <input type="date" [(ngModel)]="fechaHasta" class="bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm focus:outline-none focus:border-blue-500">
+      </div>
+      <button (click)="cargarEstadisticas()" 
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition h-[38px]">
+        Filtrar
+      </button>
+    </div>
+  </div>
+
+  @if (cargando) {
+    <div class="text-center py-20 text-slate-400">
+      <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+      Generando gráficos...
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 flex flex-col items-center">
+        <h3 class="text-sm font-semibold text-slate-300 mb-4 text-center">Publicaciones por Usuario</h3>
+        <div class="w-full max-w-xs h-64 relative">
+          <canvas baseChart
+            [data]="pieChartData"
+            [type]="pieChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 flex flex-col">
+        <h3 class="text-sm font-semibold text-slate-300 mb-4 text-center">Comentarios por Día</h3>
+        <div class="w-full h-64 relative">
+          <canvas baseChart
+            [data]="lineChartData"
+            [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700 flex flex-col md:col-span-2">
+        <h3 class="text-sm font-semibold text-slate-300 mb-4 text-center">Top 10 - Publicaciones con más Comentarios</h3>
+        <div class="w-full h-72 relative">
+          <canvas baseChart
+            [data]="barChartData"
+            [type]="barChartType">
+          </canvas>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

@@ -9,11 +9,12 @@ import { environment } from '../../../../enviroment/enviroment';
 import { CrearPost } from '../crear-post/crear-post';
 import Swal from 'sweetalert2';
 import { PostCard } from '../post-card/post-card';
+import { AutofocusDirective } from '../../../core/directives/autofocus';
 
 @Component({
   selector: 'app-feed',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, CrearPost, PostCard],
+  imports: [CommonModule, RouterLink, FormsModule, CrearPost, PostCard, AutofocusDirective],
   templateUrl: './feed.html',
   styleUrls: ['./feed.css']
 })
@@ -92,7 +93,7 @@ export class Feed implements OnInit {
     }
   }
 
-  eliminarPost(postId: string): void {
+    eliminarPost(postId: string): void {
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Vas a eliminar esta publicación de la cloaca.',
@@ -108,7 +109,20 @@ export class Feed implements OnInit {
       if (result.isConfirmed) {
         this.postService.deletePost(postId).subscribe({
           next: () => {
-            this.posts.update(postsActuales => postsActuales.filter(p => p._id !== postId));
+            if (this.postSeleccionado()?._id === postId) {
+              this.cerrarDetallePost();
+            }
+
+            this.cargarPosts(); 
+          },
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo eliminar la publicación.',
+              background: '#1e293b',
+              color: '#f8fafc'
+            });
           }
         });
       }
@@ -255,6 +269,24 @@ export class Feed implements OnInit {
         console.error('Error al editar comentario desde modal:', err);
       }
     });
+  }
+
+  puedeEliminarModal(post: Post): boolean {
+    if (!post.autor) return false;
+    
+    const autorId = typeof post.autor === 'object' ? (post.autor as any)._id : post.autor;
+    const esDueño = autorId === this.usuarioLogueadoId;
+
+    let esAdmin = false;
+    const usuarioStorage = localStorage.getItem('usuario');
+    if (usuarioStorage) {
+      try {
+        const usuario = JSON.parse(usuarioStorage);
+        esAdmin = usuario.perfil === 'admin';
+      } catch (e) {}
+    }
+
+    return esDueño || esAdmin;
   }
 
   logout(): void {

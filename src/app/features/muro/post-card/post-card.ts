@@ -2,11 +2,16 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Post, Comentario } from '../../../core/models/post';
+import { TimeAgoPipe } from '../../../core/pipes/time-ago-pipe';
+import { TruncatePipe } from '../../../core/pipes/truncate-pipe';
+import { HoverDirective } from '../../../core/directives/hover';
+import { HighlightDirective } from '../../../core/directives/highlight';
+
 
 @Component({
   selector: 'app-post-card',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TimeAgoPipe, TruncatePipe, HoverDirective, HighlightDirective],
   templateUrl: './post-card.html'
 })
 export class PostCard {
@@ -65,5 +70,23 @@ export class PostCard {
       texto: this.textoEdicion.trim()
     });
     this.cancelarEdicion();
+  }
+
+  puedeEliminar(): boolean {
+    if (!this.post.autor) return false;
+    
+    const autorId = typeof this.post.autor === 'object' ? (this.post.autor as any)._id : this.post.autor;
+    const esDueño = autorId === this.usuarioLogueadoId;
+
+    let esAdmin = false;
+    const usuarioStorage = localStorage.getItem('usuario');
+    if (usuarioStorage) {
+      try {
+        const usuario = JSON.parse(usuarioStorage);
+        esAdmin = usuario.perfil === 'admin';
+      } catch (e) {}
+    }
+
+    return esDueño || esAdmin;
   }
 }

@@ -4,6 +4,7 @@ export interface Comentario {
         _id: string;
         username: string;
         avatar?: string;
+        perfil?: string;
     };
     texto: string;
     createdAt: string | Date;

@@ -8,6 +8,24 @@
     <a routerLink="/feed" class="text-sm text-slate-300 hover:text-white transition">Muro</a>
     <a routerLink="/profile" class="text-sm text-slate-300 hover:text-white transition">Perfil</a>
     
+    @if (authService.getUsuarioActual()?.perfil === 'admin') {
+      <div class="relative group py-2">
+        <span class="text-sm text-slate-300 group-hover:text-white transition cursor-default flex items-center gap-1">
+          Dashboard
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </span>
+        
+        <div class="absolute left-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl hidden group-hover:block z-50">
+          <a routerLink="/dashboard/usuarios" class="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition rounded-t-lg">
+            Usuarios
+          </a>
+          <a routerLink="/dashboard/estadisticas" class="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition rounded-b-lg">
+            Estadísticas
+          </a>
+        </div>
+      </div>
+    }
+    
     @if (authService.tiempoRestante() > 0) {
       <div class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg">
         <span class="text-amber-400 text-sm animate-pulse">⏱️</span>
@@ -17,9 +35,7 @@
       </div>
     }
 
-    <button 
-      (click)="onLogout()" 
-      class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium rounded-lg transition cursor-pointer">
+    <button (click)="onLogout()" class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium rounded-lg transition cursor-pointer">
       Cerrar Sesión
     </button>
   </div>
